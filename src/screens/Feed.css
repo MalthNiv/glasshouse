@@ -1,0 +1,46 @@
+html { scroll-behavior: smooth; }
+
+/* Feed geometry: posts are 482px wide. */
+.feed {
+  --post-w: 482px;
+}
+
+/* ---- Feed ------------------------------------------------------------------ */
+.feed {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+}
+
+/* One continuous black surface, like scrolling Instagram: it runs the full height of the
+   page with square top and bottom edges. Posts are not boxed or divided; each header simply
+   follows the previous post's date with a modest gap. A soft, light-blue glow surrounds it. */
+.feed-column {
+  width: 100%;
+  max-width: var(--post-w);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #000;
+  overflow: hidden;
+  box-shadow:
+    0 0 30px rgba(170, 207, 252, 0.42),
+    0 0 90px rgba(148, 190, 246, 0.3),
+    0 0 220px rgba(120, 166, 232, 0.2),
+    0 0 420px rgba(95, 140, 215, 0.13);
+}
+
+.feed-column .post-card {
+  max-width: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Posts revealed by an answer ease in. */
+.feed-enter { animation: feed-enter 0.7s ease both; }
+@keyframes feed-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .feed-enter { animation: none; }
+}

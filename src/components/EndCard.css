@@ -1,0 +1,62 @@
+/* End of the feed, as Instagram ends one: centred, quiet, "You're all caught up". */
+.end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 72px 20px 80px;
+  text-align: center;
+}
+
+.end-check {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.end-line {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 22px;       /* Jost SemiBold */
+  font-weight: 600;
+  line-height: 1.25;
+  color: #fff;
+}
+
+/* Reserved height for the button, so the page does not shift when it appears. */
+.end-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 28px;
+}
+
+/* Jost Medium 14, tracking 1 (the "Continue" spec). A solid white pill: no border needed. */
+.end-btn {
+  padding: 12px 30px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #000;
+  background: #fff;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  animation: end-in 1.2s ease both;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.end-btn:hover { background: #d9e8ff; }
+.end-btn:active { transform: scale(0.97); }
+.end-btn:focus-visible { outline: 2px solid #bcd8ff; outline-offset: 3px; }
+
+@keyframes end-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 520px) {
+  .end { padding: 56px 16px 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .end-btn { animation: none; transition: none; }
+}

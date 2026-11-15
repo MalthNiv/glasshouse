@@ -1,0 +1,126 @@
+/*
+  Timeline (10s total, mirrors OPENING_MS in OpeningTransition.tsx; 1s = 10%):
+    0.0 -  1.0s   wall fades in over the fog
+    1.0 -  3.4s   hold: slow drift and a slight tilt settling, so it never feels frozen
+    2.8 -  5.8s   vignette closes in
+    3.0 -  5.0s   spotlight blooms on Alex's card
+    3.4 -  7.6s   camera pushes toward the first post, accelerating, card straightens
+    3.4 -  6.0s   edges defocus; the blurred layer rushes past faster (parallax)
+    5.2 -  7.8s   everything sinks into the dark
+    6.8s          the feed starts fading in underneath (via onReveal)
+    7.5 -  9.6s   overlay dissolves, leaving the feed on the fog backdrop
+*/
+.ot {
+  --ot-dark: #050a14;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: var(--ot-dark);
+  opacity: 0;
+  animation: ot-life 10s linear forwards;
+}
+.ot.skip { animation: ot-skip 0.5s ease forwards; }
+
+.ot-cam {
+  position: absolute;
+  inset: 0;
+  transform-origin: var(--ot-ox) var(--ot-oy);
+  animation: ot-push 10s ease-in-out forwards;
+  will-change: transform;
+}
+.ot-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+.ot-dof {
+  filter: blur(16px);
+  opacity: 0;
+  transform-origin: var(--ot-ox) var(--ot-oy);
+  /* clear around the centre card (which sits at the transform origin), blurred beyond it */
+  -webkit-mask-image: radial-gradient(ellipse 22% 38% at var(--ot-ox) var(--ot-oy), transparent 55%, #000 100%);
+  mask-image: radial-gradient(ellipse 22% 38% at var(--ot-ox) var(--ot-oy), transparent 55%, #000 100%);
+  /* on top of the camera's own move, scale up a little more: the periphery is "closer" */
+  animation:
+    ot-dof 10s linear forwards,
+    ot-far 10s cubic-bezier(0.6, 0, 0.1, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Soft light on Alex's card; lives inside the camera so it travels with the card. */
+.ot-glow {
+  position: absolute;
+  left: var(--ot-ox);
+  top: var(--ot-oy);
+  width: 70vmax;
+  height: 70vmax;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(120, 165, 230, 0.4), rgba(120, 165, 230, 0));
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  animation: ot-glow 10s linear forwards;
+}
+
+.ot-vignette,
+.ot-dim { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.ot-vignette {
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, transparent 25%, rgba(5, 10, 20, 0.9) 100%);
+  animation: ot-vignette 10s linear forwards;
+}
+.ot-dim { background: var(--ot-dark); animation: ot-dim 10s linear forwards; }
+
+@keyframes ot-life {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  75% { opacity: 1; }
+  96% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes ot-skip { from { opacity: 1; } to { opacity: 0; } }
+
+@keyframes ot-push {
+  /* hold: drift in and settle the tilt */
+  0% { transform: translate(0, 0) scale(1) rotate(0.9deg); }
+  /* push: slow start, then accelerate, then ease into place */
+  34% {
+    transform: translate(0, 0) scale(1.05) rotate(-0.3deg);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.1, 1);
+  }
+  76%, 100% { transform: translate(var(--ot-tx), var(--ot-ty)) scale(var(--ot-s)) rotate(0deg); }
+}
+@keyframes ot-far {
+  0%, 34% { transform: scale(1); }
+  76%, 100% { transform: scale(1.12); }
+}
+@keyframes ot-dof {
+  0%, 34% { opacity: 0; }
+  60%, 100% { opacity: 1; }
+}
+@keyframes ot-glow {
+  0%, 30% { opacity: 0; }
+  50% { opacity: 1; }
+  76%, 100% { opacity: 0.5; }
+}
+@keyframes ot-vignette {
+  0%, 28% { opacity: 0; }
+  58%, 100% { opacity: 1; }
+}
+@keyframes ot-dim {
+  0%, 52% { opacity: 0; }
+  78%, 100% { opacity: 0.92; }
+}
+
+/* The feed waits invisibly underneath, then fades in as the overlay dissolves. */
+.feed-stage { opacity: 0; transition: opacity 1.4s ease; }
+.feed-stage.on { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-stage { transition: none; }
+}
+

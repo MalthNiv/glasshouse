@@ -1,0 +1,137 @@
+/* Dark Instagram-style post card. Everything is scoped under .post-card. */
+.post-card {
+  --pc-bg: #000;
+  --pc-ink: #fff;
+  --pc-muted: #8e8e8e;
+  --pc-like: #ff3040;
+
+  position: relative;
+  width: 100%;
+  max-width: 482px;
+  margin: 0 auto;
+  background: var(--pc-bg);
+  color: var(--pc-ink);
+  border: 1px solid #262626;
+  border-radius: 20px;
+  overflow: hidden;
+  font-family: var(--font-ui);
+}
+
+.pc-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px 16px;
+}
+.pc-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.pc-id { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.25; }
+.pc-name { font-size: 15px; font-weight: 600; }          /* Jost SemiBold 15 */
+.pc-handle { font-size: 12px; letter-spacing: 1px; color: var(--pc-muted); }   /* Jost Regular 12, tracking 1 */
+.pc-more { font-size: 15px; letter-spacing: 1px; padding-right: 4px; }
+
+/* Photos are 1:1. A few exports (12a, 13a, 14b) have white padding baked in
+   below the picture, so crop to a square from the top instead of showing it. */
+.pc-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: top;
+  background: #111;
+}
+
+/* 44px icon PNGs (with built-in padding) sit edge to edge, as in the Figma frame. */
+.pc-actions { display: flex; align-items: center; padding: 8px 12px 0; }
+.pc-actions .pc-save { margin-left: auto; }
+.pc-btn {
+  display: block;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.pc-icon { display: block; width: 44px; height: 44px; pointer-events: none; user-select: none; }
+.pc-btn:hover { opacity: 0.75; }
+.pc-btn:active { transform: scale(0.88); }
+.pc-btn:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.pc-like.on .pc-icon { animation: pc-pop 0.3s ease; }
+
+.pc-body { padding: 8px 20px 20px; }
+.pc-line { margin: 0 0 10px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }   /* Jost Regular 14 */
+.pc-line b { font-weight: 600; }
+.pc-comment { display: flex; align-items: flex-start; gap: 8px; }
+.pc-comment .pc-line { flex: 1; min-width: 0; }
+/* Small heart, right-aligned. The PNG has built-in padding, so pull it in
+   to line up with the card's right edge and the first line of text. */
+.pc-comment-like {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: -2px -6px 0 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.pc-comment-like img { display: block; width: 24px; height: 24px; pointer-events: none; user-select: none; }
+.pc-comment-like:hover { opacity: 0.75; }
+.pc-comment-like:active { transform: scale(0.85); }
+.pc-comment-like:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.pc-comment-like[aria-pressed='true'] img { animation: pc-pop 0.3s ease; }
+
+.pc-view-comments {
+  display: block;
+  margin: 0 0 10px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--pc-muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.pc-view-comments:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.pc-time {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;        /* Jost Regular 12, tracking 1 */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--pc-muted);
+}
+
+.pc-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: #262626;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+@keyframes pc-pop { 50% { transform: scale(1.25); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-btn { transition: none; }
+  .pc-like.on .pc-icon, .pc-comment-like[aria-pressed='true'] img { animation: none; }
+  .pc-comment-like { transition: none; }
+}
+
+/* Dev-only preview page (?dev=posts) */
+.dev-posts { min-height: 100%; background: #121212; padding: 24px 16px 80px; color: #fff; }
+.dev-posts h2 { max-width: 482px; margin: 32px auto 12px; font-size: 14px; font-weight: 500; color: #8e8e8e; letter-spacing: 0.08em; text-transform: uppercase; }
+.dev-posts .post-card { margin-bottom: 24px; }

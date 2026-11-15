@@ -1,0 +1,125 @@
+/*
+  Fixed background: unfogged photo + CSS fog.
+
+  Tuning knobs (set on .backdrop, or via the <Backdrop> props):
+    --fog-density  0..1   overall fog amount (0 = clear photo, 1 = full fog)
+    --fog-veil-max 0..1   veil opacity at density 1 (how much photo still shows)
+    --fog-speed    >0     drift speed multiplier (1 = default)
+  Every fog layer scales its opacity from --fog-density and eases changes,
+  so animating the prop fades the fog in and out smoothly.
+*/
+.backdrop {
+  --fog-density: 1;
+  --fog-speed: 1;
+  /* Breathing: the whole fog slowly thins and thickens. Amplitude 0..1 (0 = off), period in seconds. */
+  --fog-breathe: 0.16;
+  --fog-breathe-s: 11s;
+  --fog-ease: 2.5s ease;
+  /* How opaque the veil gets at density 1. Lower = more of the photo shows through. */
+  --fog-veil-max: 1;
+  /* How soft the photo gets at density 1 (fog scatters detail). */
+  --fog-blur-max: 2.6px;
+
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #233f5d; /* shown while the photo loads */
+}
+
+.backdrop-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(calc(var(--fog-density) * var(--fog-blur-max)));
+  transform: scale(var(--bd-zoom, 1.02)); /* slightly above 1 also hides the blurred edge */
+  transition: filter var(--fog-ease), transform var(--bd-zoom-ease, 10s ease-out);
+}
+
+.fog {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  animation: fog-breathe calc(var(--fog-breathe-s) / var(--fog-speed)) ease-in-out infinite alternate;
+}
+.fog > *, .fog-clouds > * { position: absolute; will-change: transform, opacity; }
+
+/* Base veil: a deep navy blue with tonal variation (a lighter band across the
+   top, soft light on the left, darker corners). */
+.fog-veil {
+  inset: 0;
+  opacity: calc(var(--fog-density) * var(--fog-veil-max));
+  transition: opacity var(--fog-ease);
+  background:
+    radial-gradient(ellipse 55% 32% at 55% 0%, rgba(80, 125, 170, 0.8), transparent 72%),
+    radial-gradient(ellipse 32% 48% at 8% 28%, rgba(58, 98, 142, 0.5), transparent 72%),
+    radial-gradient(ellipse 40% 30% at 20% 82%, rgba(20, 36, 62, 0.7), transparent 72%),
+    radial-gradient(ellipse 26% 42% at 96% 10%, rgba(24, 40, 66, 0.75), transparent 72%),
+    radial-gradient(ellipse 50% 30% at 70% 88%, rgba(44, 76, 114, 0.45), transparent 72%),
+    #233f5d;
+}
+
+/* Big soft clouds drifting slowly across the veil. */
+.fog-clouds {
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--fog-density) * 0.6);
+  transition: opacity var(--fog-ease);
+}
+.fog-blob {
+  border-radius: 50%;
+  animation: fog-drift calc(var(--dur) / var(--fog-speed)) ease-in-out infinite alternate;
+}
+.b1 { --dur: 24s; width: 70vmax; height: 38vmax; left: -15vmax; top: -8vmax;
+      background: radial-gradient(closest-side, rgba(88, 128, 175, 0.38), transparent); --dx: 30vmax; --dy: 6vmax; }
+.b2 { --dur: 28s; width: 60vmax; height: 34vmax; right: -20vmax; top: 12vh;
+      background: radial-gradient(closest-side, rgba(18, 34, 58, 0.35), transparent); --dx: -26vmax; --dy: 10vmax; }
+.b3 { --dur: 32s; width: 75vmax; height: 40vmax; left: -10vmax; bottom: -18vmax;
+      background: radial-gradient(closest-side, rgba(20, 36, 60, 0.35), transparent); --dx: 28vmax; --dy: -8vmax; }
+.b4 { --dur: 26s; width: 55vmax; height: 30vmax; left: 30vw; top: 30vh;
+      background: radial-gradient(closest-side, rgba(70, 108, 152, 0.35), transparent); --dx: -20vmax; --dy: 8vmax; }
+.b5 { --dur: 36s; width: 60vmax; height: 30vmax; right: -12vmax; bottom: -6vmax;
+      background: radial-gradient(closest-side, rgba(60, 96, 140, 0.35), transparent); --dx: -24vmax; --dy: -10vmax; }
+
+/* Fine cloud texture: tiled fractal noise, scrolled by exactly one tile width
+   so the loop is seamless. Two layers move at different speeds and directions. */
+.fog-wisps {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  opacity: calc(var(--fog-density) * 0.2);
+  transition: opacity var(--fog-ease);
+}
+.w1 {
+  width: calc(100% + 900px);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='n' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.0022 0.004' numOctaves='4' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.58  0 0 0 0 0.78  0 0 0 1.8 -0.6'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 900px 900px;
+  animation: wisps-a calc(80s / var(--fog-speed)) linear infinite;
+}
+.w2 {
+  width: calc(100% + 1400px);
+  opacity: calc(var(--fog-density) * 0.14);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='1400'><filter id='n' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.0016 0.003' numOctaves='3' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.28  0 0 0 0 0.42  0 0 0 0 0.62  0 0 0 1.8 -0.65'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 1400px 1400px;
+  animation: wisps-b calc(130s / var(--fog-speed)) linear infinite;
+}
+
+/* Fine film grain, like the texture in the reference. Static. */
+.fog-grain {
+  inset: 0;
+  opacity: calc(var(--fog-density) * 0.12);
+  transition: opacity var(--fog-ease);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+}
+
+@keyframes fog-breathe { from { opacity: 1; } to { opacity: calc(1 - var(--fog-breathe)); } }
+@keyframes fog-drift { to { transform: translate(var(--dx), var(--dy)) scale(1.2); } }
+@keyframes wisps-a { from { transform: translateX(0); } to { transform: translateX(-900px); } }
+@keyframes wisps-b { from { transform: translateX(-1400px); } to { transform: translateX(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fog, .fog-blob, .fog-wisps { animation: none; }
+  .fog-veil, .fog-clouds, .fog-wisps, .fog-grain, .backdrop-photo { transition: none; }
+}

@@ -1,0 +1,73 @@
+/* A question set into the post column: just type on the black surface. No card, no boxes.
+   Type per assets/font-breakdown.png: question Jost SemiBold 28, answers Jost Medium 16. */
+.qc { padding: 44px 20px 48px; }
+
+
+/* One short hairline above the question, as a quiet classic touch. */
+.qc-rule {
+  width: 28px;
+  height: 1px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.qc-prompt {
+  margin: 0 0 22px;
+  font-family: var(--font-ui);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.qc-options { display: flex; flex-direction: column; gap: 2px; margin: 0 -10px; }
+
+.qc-option {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  width: 100%;
+  padding: 12px 10px;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.72);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease, opacity 0.35s ease;
+}
+.qc-letter {
+  flex: none;
+  width: 14px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.2s ease;
+}
+
+.qc-option:hover:not(:disabled),
+.qc-option:focus-visible:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+.qc-option:hover:not(:disabled) .qc-letter,
+.qc-option:focus-visible:not(:disabled) .qc-letter { color: #bcd8ff; }
+.qc-option:focus-visible:not(:disabled) { box-shadow: 0 0 0 2px rgba(188, 216, 255, 0.55); }
+
+.qc-option.chosen { color: #fff; cursor: default; }
+.qc-option.chosen .qc-letter { color: #bcd8ff; }
+.qc-option:disabled:not(.chosen) { opacity: 0.4; cursor: default; }
+
+@media (max-width: 520px) {
+  .qc { padding: 36px 16px 40px; }
+  .qc-prompt { font-size: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qc-option, .qc-letter { transition: none; }
+}

@@ -10,16 +10,6 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
 
   return (
     <main className={`landing${leaving ? ' leaving' : ''}`}>
-      <div className="fog" aria-hidden="true">
-        <span className="cloud c1" />
-        <span className="cloud c2" />
-        <span className="cloud c3" />
-        <span className="cloud c4" />
-        <span className="cloud c5" />
-        <span className="cloud c6" />
-      </div>
-      <div className="frost" aria-hidden="true" />
-
       <div className="content">
         <h1 className="title" aria-label="Glasshouse">
           <span className="t-blur" aria-hidden="true">Glasshouse</span>

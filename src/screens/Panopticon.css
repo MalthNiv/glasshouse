@@ -1,0 +1,322 @@
+/*
+  The unseen, in five parts (see Panopticon.tsx):
+    reveal  the clear building
+    one     a post in its own card on the left, a message and a button on the right
+    two     the same, mirrored
+    rows    the rest of the posts in two rows sliding in opposite directions, then the question
+    finale  the glass fogs up; "Glasshouse" and a thank you
+
+  Fades use `backwards` (not `both`) wherever something is later faded out by a class, so the
+  animation does not keep holding its last value over the class.
+*/
+.pano {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  color: #fff;
+  animation: pano-fade 1.6s ease both;
+}
+
+/* Darken the edges so the eye stays towards the middle. */
+.pano-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 90% at 50% 50%, transparent 50%, rgba(2, 6, 14, 0.6) 100%);
+}
+
+/* A wash of light from the dome as the fog finally lets go. */
+.pano-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 65% at 50% 12%, rgba(205, 228, 255, 0.85), rgba(205, 228, 255, 0) 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: pano-flash 4.5s ease-out 1.5s both;
+}
+
+/* ---- A post to interact with: its own rounded card, a message and a button beside it -------- */
+.pf {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  padding: 32px 24px;
+  overflow-y: auto;
+  transition: opacity 0.9s ease;
+}
+.pf.leaving { opacity: 0; }
+
+/* margin: auto centres the content, and still lets it scroll from the top if it is taller than the screen. */
+.pf-inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(40px, 6vw, 96px);
+  margin: auto;
+}
+.pf-left .pf-inner { flex-direction: row; }
+.pf-right .pf-inner { flex-direction: row-reverse; }
+
+/* The card is as wide as fits the screen's height, up to the feed's width. */
+.pf-card {
+  flex: none;
+  width: clamp(300px, calc((100vh - 64px) * 0.62), 482px);
+  animation: pf-from-left 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+.pf-right .pf-card { animation-name: pf-from-right; }
+.pf-card .post-card {
+  box-shadow:
+    0 0 40px rgba(170, 207, 252, 0.4),
+    0 0 120px rgba(120, 166, 232, 0.25);
+}
+
+.pf-msg {
+  width: min(100%, 340px);
+  animation: pf-in 1.2s ease 0.9s backwards;
+}
+.pf-tag {
+  margin: 0 0 14px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.pf-title {
+  margin: 0 0 16px;
+  font-size: 28px;              /* Jost SemiBold 28, like the questions */
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+}
+.pf-body {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+}
+.pf-slot {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 28px;
+}
+/* Jost Medium 14, tracking 1 (the "Continue" spec): a solid white pill. */
+.pf-btn {
+  padding: 12px 30px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #000;
+  background: #fff;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  animation: pf-in 1.2s ease backwards;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.pf-btn:hover { background: #d9e8ff; }
+.pf-btn:active { transform: scale(0.97); }
+.pf-btn:focus-visible { outline: 2px solid #bcd8ff; outline-offset: 3px; }
+
+/* ---- Two rows of posts, sliding in opposite directions ------------------------------------- */
+.pano-rows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 3.5s ease;
+  animation: pano-fade 1.8s ease backwards;
+}
+.pano-rows.fading { opacity: 0; }
+
+.pr {
+  --w: 12em;
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: clamp(10px, 1.25vmin, 13px);
+  overflow: hidden;
+  /* the posts fade in and out at the edges of the screen */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.pr-top { top: clamp(12px, 3vh, 32px); }
+.pr-bottom { bottom: clamp(12px, 3vh, 32px); }
+
+/* A post's width takes about 10s to pass. The track is three sets wide and slides by one. */
+.pr-track {
+  display: flex;
+  align-items: flex-start;
+  width: max-content;
+  animation: pr-slide calc(var(--n) * 10s) linear infinite;
+  will-change: transform;
+}
+.pr-bottom .pr-track { animation-direction: reverse; }
+
+.pr-win {
+  flex: none;
+  width: var(--w);
+  margin-right: 1.6em;   /* margin, not gap, so one set is exactly a third of the track */
+  background: #000;
+  box-shadow:
+    0 0 30px rgba(170, 207, 252, 0.28),
+    0 0 90px rgba(120, 166, 232, 0.18);
+}
+.pr-win img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: top;
+  background: #111;
+  user-select: none;
+}
+/* A fixed height, so every window is the same size however long its caption is: room for a label
+   that wraps to two lines and a caption of up to three. */
+.pr-meta {
+  box-sizing: border-box;
+  height: 10.4em;
+  padding: 0.9em 1em 1.1em;
+  overflow: hidden;
+}
+.pr-tag {
+  margin: 0 0 0.5em;
+  font-size: 0.75em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.pr-cap {
+  margin: 0;
+  font-size: 1.15em;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+/* ---- The two lines in the middle of the screen --------------------------------------------- */
+.pano-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 3s ease;
+}
+.pano-text.fading { opacity: 0; }
+/* A soft dark pool behind the words keeps them readable over the building. */
+.pano-text-inner {
+  padding: 3.4em 5em;
+  background: radial-gradient(closest-side, rgba(2, 6, 14, 0.6), rgba(2, 6, 14, 0));
+}
+.pano-q,
+.pano-a {
+  margin: 0;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.7);
+}
+.pano-q {
+  animation: pano-line 1.8s ease backwards;
+  transition: opacity 1.8s ease;
+}
+/* Once the answer arrives, the question steps back so the answer is all there is. */
+.pano-q.dim { opacity: 0.5; }
+.pano-q {
+  font-size: clamp(28px, 4.2vmin, 46px);   /* Jost SemiBold, like the branch questions */
+  font-weight: 600;
+  line-height: 1.2;
+}
+/* "You decide." is the point of the whole scene: very large, heavy, and lit. It comes out of a blur. */
+.pano-a {
+  margin-top: 0.3em;
+  font-size: clamp(34px, 6.2vmin, 68px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: #fff;
+  text-shadow:
+    0 0 26px rgba(215, 232, 255, 0.8),
+    0 0 70px rgba(165, 202, 255, 0.65),
+    0 0 150px rgba(130, 180, 255, 0.5);
+  animation:
+    pano-decide 2.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards,
+    pano-glow 4.5s ease-in-out 2.8s infinite alternate;
+}
+
+/* ---- The end: it echoes the opening screen ------------------------------------------------- */
+/* The title itself (.title, .t-blur, .t-sharp) is the landing screen's, from styles.css. */
+.pano-finale {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.4rem;
+  padding: 1rem;
+  text-align: center;
+}
+/* Cinzel, the wordmark's own face (its lower case is small capitals); it emerges from the blur like the opening button. */
+.pano-thanks {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 5px;
+  padding-left: 5px; /* optically re-centre after letter-spacing */
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  animation: emerge 2.8s cubic-bezier(0.37, 0, 0.63, 1) 3.4s forwards;
+}
+
+@keyframes pano-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pano-flash { 0% { opacity: 0; } 22% { opacity: 0.75; } 100% { opacity: 0; } }
+/* The glow slowly swells and settles, so it feels lit and alive without getting any bigger. */
+@keyframes pano-glow {
+  from {
+    text-shadow: 0 0 22px rgba(215, 232, 255, 0.65), 0 0 60px rgba(165, 202, 255, 0.5), 0 0 120px rgba(130, 180, 255, 0.35);
+  }
+  to {
+    text-shadow: 0 0 30px rgba(225, 238, 255, 0.95), 0 0 84px rgba(175, 210, 255, 0.8), 0 0 180px rgba(140, 188, 255, 0.6);
+  }
+}
+@keyframes pano-decide {
+  from { opacity: 0; transform: scale(1.16); filter: blur(16px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes pano-line { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pf-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes pf-from-left { from { opacity: 0; transform: translateX(-90px); } to { opacity: 1; transform: none; } }
+@keyframes pf-from-right { from { opacity: 0; transform: translateX(90px); } to { opacity: 1; transform: none; } }
+@keyframes pr-slide { from { transform: translateX(0); } to { transform: translateX(-33.3333%); } }
+
+/* Phones: less room around the words, so "You decide." stays on one line. */
+@media (max-width: 599px) {
+  .pano-text-inner { padding: 3em 0.5em; }
+  .pano-a { font-size: clamp(34px, 10vw, 46px); }
+}
+
+/* Phones: the card above its message, and the whole thing scrolls. */
+@media (max-width: 899px) {
+  .pf-inner, .pf-left .pf-inner, .pf-right .pf-inner {
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+  }
+  .pf-card { width: min(100%, 482px); }
+  .pf-msg { text-align: left; }
+  .pf-title { font-size: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pano, .pano-rows, .pf-card, .pf-msg, .pf-btn, .pano-q, .pano-a { animation: none; }
+  .pr-track { animation: none; }
+  .pano-flash { display: none; }
+  .pano-thanks { animation-duration: 0.01s; animation-delay: 0s; }
+  .pf, .pano-rows, .pano-text { transition: none; }
+}
